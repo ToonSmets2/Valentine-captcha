@@ -7,10 +7,7 @@
   <style>
     :root{
       --bg:#0b0d12;
-      --panel:#0f1320;
-      --panel2:#0c0f1a;
       --stroke:rgba(255,255,255,.12);
-      --stroke2:rgba(255,255,255,.18);
       --text:rgba(255,255,255,.92);
       --muted:rgba(255,255,255,.62);
       --muted2:rgba(255,255,255,.48);
@@ -19,7 +16,6 @@
       --accent:#7bd2ff;
       --accent2:#a78bfa;
       --good:#39d98a;
-      --warn:#ffd166;
       --pink:#ff4fa6;
     }
 
@@ -120,10 +116,6 @@
       padding: 18px 16px 16px;
       background: linear-gradient(180deg, rgba(0,0,0,.06), transparent);
     }
-    .row{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
-      flex-wrap:wrap;
-    }
     .title{
       font-size: 18px;
       font-weight: 900;
@@ -164,14 +156,26 @@
       opacity:1;
       transform: scale(1);
     }
-    .spinner{
-      width:16px;height:16px;border-radius:999px;
-      border:2px solid rgba(255,255,255,.22);
-      border-top-color: rgba(255,255,255,.88);
-      animation: spin .8s linear infinite;
+
+    /* "real captcha" rotating logo */
+    .captcha-logo{
+      width:26px; height:26px;
       margin-left:auto;
+      display:inline-block;
+      border-radius:999px;
+      background:
+        conic-gradient(from 0deg,
+          rgba(123,210,255,.95),
+          rgba(167,139,250,.95),
+          rgba(255,79,166,.95),
+          rgba(123,210,255,.95));
+      -webkit-mask: radial-gradient(circle at 50% 50%, transparent 43%, #000 44%);
+      mask: radial-gradient(circle at 50% 50%, transparent 43%, #000 44%);
+      box-shadow: 0 0 0 4px rgba(255,255,255,.06);
+      animation: spin 1s linear infinite;
     }
     @keyframes spin{to{transform:rotate(360deg)}}
+
     .progress{
       margin-top: 12px;
       height:10px;
@@ -229,15 +233,20 @@
       .grid{grid-template-columns: repeat(2, 1fr);}
     }
 
+    /* KEY FIX: show full photo (no crop) */
     .tile{
       position:relative;
       border-radius: 14px;
       overflow:hidden;
-      background: rgba(255,255,255,.02);
+      background: rgba(0,0,0,.22);
       border: 1px solid rgba(255,255,255,.12);
       cursor:pointer;
       user-select:none;
-      transition: transform .10s ease, border-color .10s ease, box-shadow .10s ease, filter .10s ease;
+      transition: transform .10s ease, border-color .10s ease, box-shadow .10s ease;
+      aspect-ratio: 16 / 10; /* consistent tile height without cropping */
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
     .tile:hover{
       transform: translateY(-2px);
@@ -246,16 +255,17 @@
     }
     .tile img{
       width:100%;
-      height: 190px;
-      object-fit: cover;
+      height:100%;
+      object-fit: contain;            /* <-- show full photo */
+      object-position: center;
       display:block;
-      filter: saturate(1) contrast(1.02);
+      background: rgba(0,0,0,.35);    /* letterbox behind photo */
     }
     .tile .shade{
       position:absolute; inset:0;
-      background: linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.40));
+      background: linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.35));
       pointer-events:none;
-      opacity:.9;
+      opacity:.65;
     }
     .check{
       position:absolute;
@@ -318,7 +328,7 @@
       border: 1px solid rgba(255,255,255,.12);
     }
 
-    /* ---------- Screen 3: Valentine ---------- */
+    /* ---------- Screen 3: Valentine (OVER THE TOP) ---------- */
     .valentine{
       min-height: calc(100vh - 70px);
       position:relative;
@@ -327,9 +337,10 @@
       border: 1px solid rgba(255,255,255,.14);
       box-shadow: var(--shadow);
       background:
-        radial-gradient(1100px 650px at 20% 18%, rgba(255,255,255,.35), transparent 55%),
-        radial-gradient(900px 560px at 80% 22%, rgba(255,79,166,.45), transparent 55%),
-        linear-gradient(180deg, #ff6fb7, #ff2f78 70%, #ff3d8f);
+        radial-gradient(1200px 700px at 20% 18%, rgba(255,255,255,.38), transparent 55%),
+        radial-gradient(900px 560px at 80% 22%, rgba(255,79,166,.55), transparent 55%),
+        radial-gradient(900px 560px at 50% 80%, rgba(255,180,220,.35), transparent 55%),
+        linear-gradient(180deg, #ff7dc1, #ff2a78 65%, #ff3fa0);
     }
     .val-inner{
       position:relative;
@@ -343,18 +354,19 @@
       min-height: calc(100vh - 70px);
     }
     .big{
-      font-size: clamp(34px, 5vw, 66px);
+      font-size: clamp(34px, 5vw, 70px);
       font-weight: 1100;
       letter-spacing: 1px;
-      text-shadow: 0 16px 60px rgba(0,0,0,.25);
+      text-shadow: 0 18px 70px rgba(0,0,0,.25);
       margin-bottom: 12px;
     }
     .subbig{
-      font-size: clamp(14px, 2.2vw, 20px);
-      font-weight: 850;
-      color: rgba(255,255,255,.92);
-      max-width: 720px;
-      line-height:1.35;
+      font-size: clamp(16px, 2.4vw, 24px);
+      font-weight: 900;
+      color: rgba(255,255,255,.95);
+      max-width: 760px;
+      line-height:1.25;
+      text-shadow: 0 10px 34px rgba(0,0,0,.18);
     }
     .val-actions{
       margin-top: 18px;
@@ -364,20 +376,22 @@
       justify-content:center;
     }
 
-    /* Hearts + roses effects */
+    /* Effects layers */
     .float-layer{
       position:absolute; inset:0;
       z-index:1;
       pointer-events:none;
       overflow:hidden;
     }
+
+    /* Hearts */
     .heart{
       position:absolute;
-      top:-10vh;
+      top:-12vh;
       width: 18px;
       height: 18px;
       transform: rotate(45deg);
-      opacity: .85;
+      opacity: .9;
       animation: fall linear forwards;
       filter: drop-shadow(0 10px 14px rgba(0,0,0,.15));
     }
@@ -386,27 +400,41 @@
       position:absolute;
       width: 18px;
       height: 18px;
-      background: rgba(255,255,255,.92);
+      background: rgba(255,255,255,.95);
       border-radius: 50%;
     }
-    .heart{ background: rgba(255,255,255,.92); }
+    .heart{ background: rgba(255,255,255,.95); }
     .heart::before{ left:-9px; top:0; }
     .heart::after{ left:0; top:-9px; }
 
     @keyframes fall{
-      to{ transform: translateY(120vh) rotate(45deg); opacity: 0; }
+      to{ transform: translateY(130vh) rotate(45deg); opacity: 0; }
     }
 
+    /* Roses */
     .rose{
       position:absolute;
-      bottom:-12vh;
-      font-size: 26px;
-      opacity: .92;
+      bottom:-14vh;
+      font-size: 28px;
+      opacity: .96;
       animation: rise linear forwards;
-      filter: drop-shadow(0 16px 20px rgba(0,0,0,.18));
+      filter: drop-shadow(0 18px 22px rgba(0,0,0,.18));
     }
     @keyframes rise{
-      to{ transform: translateY(-120vh) rotate(18deg); opacity: 0; }
+      to{ transform: translateY(-130vh) rotate(22deg); opacity: 0; }
+    }
+
+    /* Extra: sparkle hearts (emoji confetti) */
+    .emoji{
+      position:absolute;
+      top:-12vh;
+      font-size: 22px;
+      opacity: .95;
+      animation: fall2 linear forwards;
+      filter: drop-shadow(0 14px 16px rgba(0,0,0,.15));
+    }
+    @keyframes fall2{
+      to{ transform: translateY(130vh) rotate(180deg); opacity: 0; }
     }
   </style>
 </head>
@@ -424,12 +452,8 @@
           </div>
 
           <div class="verify-body">
-            <div class="row">
-              <div>
-                <h1 class="title">Verify you’re human</h1>
-                <p class="sub">This quick check helps us keep things secure. Please wait…</p>
-              </div>
-            </div>
+            <h1 class="title">Verify you’re human</h1>
+            <p class="sub">This quick check helps us keep things secure. Please wait…</p>
 
             <div id="checkline" class="checkline">
               <div class="checkbox" aria-hidden="true"></div>
@@ -437,7 +461,7 @@
                 <div style="font-weight:900; font-size:13px;">I’m not a robot</div>
                 <div style="color:var(--muted2); font-size:12px;">Validating browser integrity</div>
               </div>
-              <div class="spinner" aria-hidden="true"></div>
+              <div class="captcha-logo" aria-hidden="true" title="captcha"></div>
             </div>
 
             <div class="progress"><div class="bar"></div></div>
@@ -462,16 +486,24 @@
           <p class="captcha-sub">Verifieer als er geen meer over zijn.</p>
 
           <div class="grid" id="grid">
-            <!-- placeholders: vervang later door jouw foto’s -->
-            <div class="tile" data-id="1"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (1).jpeg" alt="foto 1"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
-            <div class="tile" data-id="2"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (2).jpeg" alt="foto 2"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
-            <div class="tile" data-id="3"><img src="https://picsum.photos/seed/me3/800/800" alt="foto 3"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
-            <div class="tile" data-id="4"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (3).jpeg" alt="foto 4"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
-            <div class="tile" data-id="5"><img src="https://picsum.photos/seed/me5/800/800" alt="foto 5"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
-            <div class="tile" data-id="6"><img src="https://picsum.photos/seed/me6/800/800" alt="foto 6"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
-            <div class="tile" data-id="7"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (7).jpeg"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
-            <div class="tile" data-id="8"><img src="https://picsum.photos/seed/me8/800/800" alt="foto 8"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
-            <div class="tile" data-id="9"><img src="https://picsum.photos/seed/me9/800/800" alt="foto 9"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+            <!-- jouw WhatsApp files -->
+            <div class="tile"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05.jpeg" alt="foto 0"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+
+            <div class="tile"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (1).jpeg" alt="foto 1"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+
+            <div class="tile"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (2).jpeg" alt="foto 2"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+
+            <div class="tile"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (3).jpeg" alt="foto 3"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+
+            <div class="tile"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (4).jpeg" alt="foto 4"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+
+            <div class="tile"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (5).jpeg" alt="foto 5"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+
+            <div class="tile"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (6).jpeg" alt="foto 6"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+
+            <div class="tile"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (7).jpeg" alt="foto 7"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+
+            <div class="tile"><img src="img/WhatsApp Image 2026-02-10 at 01.45.05 (8).jpeg" alt="foto 8"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
           </div>
 
           <div class="footer">
@@ -492,10 +524,7 @@
 
         <div class="val-inner">
           <div class="big">YOU ARE MY VALENTINE 💖</div>
-          <div class="subbig">
-            Oké… je hebt het bewijs geleverd.<br/>
-            Nu is het officieel: jij + ik = Valentijn. 🌹
-          </div>
+          <div class="subbig">Love you for always baby ❤️</div>
 
           <div class="val-actions">
             <button class="btn btn-ghost" id="backBtn" type="button">Back</button>
@@ -518,11 +547,8 @@
       window.scrollTo({top:0, behavior:"smooth"});
     }
 
-    // loader checkbox "checks" half-way for realism
     const checkline = document.getElementById("checkline");
     setTimeout(() => checkline.classList.add("checking"), 900);
-
-    // loader -> captcha
     setTimeout(() => show(s2), 2300);
 
     // Captcha logic
@@ -554,21 +580,22 @@
       updateUI();
     });
 
-    // Valentine effects
+    // OVER THE TOP effects
     const floatLayer = document.getElementById("floatLayer");
+    let effectsRunning = false;
     let heartInterval = null;
     let roseInterval = null;
-    let effectsRunning = false;
+    let emojiInterval = null;
 
     function rand(min,max){ return Math.random()*(max-min)+min; }
 
     function spawnHeart(){
       const h = document.createElement("div");
       h.className = "heart";
-      const left = rand(0, 100);
-      const dur  = rand(4.8, 8.5);
-      const size = rand(12, 26);
-      const opacity = rand(0.55, 0.95);
+      const left = rand(-5, 105);
+      const dur  = rand(2.8, 6.2);     // faster = more intense
+      const size = rand(10, 34);
+      const opacity = rand(0.55, 0.98);
 
       h.style.left = left + "vw";
       h.style.animationDuration = dur + "s";
@@ -584,15 +611,31 @@
       const r = document.createElement("div");
       r.className = "rose";
       r.textContent = "🌹";
-      const left = rand(0, 100);
-      const dur  = rand(6.5, 11.5);
-      const size = rand(18, 34);
+      const left = rand(-5, 105);
+      const dur  = rand(3.5, 7.5);     // faster rise
+      const size = rand(18, 46);
       r.style.left = left + "vw";
       r.style.animationDuration = dur + "s";
       r.style.fontSize = size + "px";
-      r.style.transform = `rotate(${rand(-12,12)}deg)`;
+      r.style.transform = `rotate(${rand(-25,25)}deg)`;
       floatLayer.appendChild(r);
       setTimeout(() => r.remove(), dur*1000 + 250);
+    }
+
+    function spawnEmoji(){
+      const e = document.createElement("div");
+      e.className = "emoji";
+      const emojis = ["💗","💖","💘","💕","💞","❤️","🌸","✨","😍","🥀"];
+      e.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      const left = rand(-5, 105);
+      const dur  = rand(2.8, 6.0);
+      const size = rand(16, 44);
+      e.style.left = left + "vw";
+      e.style.animationDuration = dur + "s";
+      e.style.fontSize = size + "px";
+      e.style.transform = `rotate(${rand(-20,20)}deg)`;
+      floatLayer.appendChild(e);
+      setTimeout(() => e.remove(), dur*1000 + 250);
     }
 
     function startValentineEffects(){
@@ -600,23 +643,35 @@
       effectsRunning = true;
       floatLayer.innerHTML = "";
 
+      // BURST at start
+      for (let i=0; i<40; i++) spawnHeart();
+      for (let i=0; i<20; i++) spawnEmoji();
+      for (let i=0; i<12; i++) spawnRose();
+
+      // Continuous storm
       heartInterval = setInterval(() => {
         spawnHeart();
-        if (Math.random() > 0.55) spawnHeart();
-      }, 220);
+        spawnHeart();
+        if (Math.random() > 0.35) spawnHeart();
+      }, 90); // VERY frequent
+
+      emojiInterval = setInterval(() => {
+        spawnEmoji();
+        if (Math.random() > 0.55) spawnEmoji();
+      }, 140);
 
       roseInterval = setInterval(() => {
         spawnRose();
-        if (Math.random() > 0.70) spawnRose();
-      }, 900);
+        if (Math.random() > 0.5) spawnRose();
+      }, 260);
     }
 
     function stopValentineEffects(){
       effectsRunning = false;
       clearInterval(heartInterval);
       clearInterval(roseInterval);
-      heartInterval = null;
-      roseInterval = null;
+      clearInterval(emojiInterval);
+      heartInterval = roseInterval = emojiInterval = null;
       floatLayer.innerHTML = "";
     }
 
@@ -646,5 +701,3 @@
   </script>
 </body>
 </html>
-
-
