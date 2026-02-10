@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Valentijn – Captcha</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Arial;margin:0;background:#0b0b0f;color:#fff}
+    .wrap{max-width:900px;margin:0 auto;padding:28px}
+    .card{background:#141422;border:1px solid #2a2a3a;border-radius:18px;padding:20px}
+    h1{margin:0 0 10px;font-size:28px}
+    p{margin:0 0 14px;opacity:.9;line-height:1.4}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
+    .opt{background:#10101a;border:1px solid #2a2a3a;border-radius:16px;overflow:hidden;cursor:pointer;transition:.15s}
+    .opt:hover{transform:translateY(-2px);border-color:#4a4a66}
+    .opt img{width:100%;height:220px;object-fit:cover;display:block}
+    .opt .bar{display:flex;gap:10px;align-items:center;padding:10px 12px}
+    .opt input{transform:scale(1.2)}
+    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px}
+    button{background:#fff;color:#111;border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.4;cursor:not-allowed}
+    .msg{margin-top:10px;font-weight:700}
+    .ok{color:#3ddc97}
+    .err{color:#ff6b6b}
+    .small{opacity:.7;font-size:12px;margin-top:10px}
+    .hidden{display:none}
+    .center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center}
+    .pill{display:inline-block;border:1px solid #2a2a3a;border-radius:999px;padding:6px 10px;opacity:.85}
+    a{color:#9ad1ff}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Scherm 1 -->
+    <div id="screen1" class="card">
+      <h1>🕵️‍♀️ Captcha: “Welke ben ik?”</h1>
+      <p>Kies de juiste foto van mij. Als je juist zit, unlock je je Valentijn-boodschap 😏</p>
+
+      <div class="grid" id="grid">
+        <!-- Vervang de src naar jouw eigen foto’s -->
+        <label class="opt">
+          <img src="https://picsum.photos/id/1027/600/600" alt="optie 1">
+          <div class="bar">
+            <input type="radio" name="pick" value="1">
+            <span>Deze is mij</span>
+          </div>
+        </label>
+
+        <label class="opt">
+          <img src="https://picsum.photos/id/1005/600/600" alt="optie 2">
+          <div class="bar">
+            <input type="radio" name="pick" value="2">
+            <span>Deze is mij</span>
+          </div>
+        </label>
+
+        <label class="opt">
+          <img src="https://picsum.photos/id/1011/600/600" alt="optie 3">
+          <div class="bar">
+            <input type="radio" name="pick" value="3">
+            <span>Deze is mij</span>
+          </div>
+        </label>
+      </div>
+
+      <div class="row">
+        <button id="checkBtn" disabled>Check ✅</button>
+        <span class="pill">Tip: als je fout zit, mag je opnieuw 😄</span>
+      </div>
+
+      <div id="message" class="msg"></div>
+      <div class="small">
+        Foto’s aanpassen: vervang in de HTML de 3 <code>img src</code>-links naar jouw eigen foto’s.
+        <br/>Correcte optie aanpassen: zie <code>CORRECT = "2"</code> in de JS.
+      </div>
+    </div>
+
+    <!-- Scherm 2 (succes) -->
+    <div id="screen2" class="card hidden">
+      <div class="center">
+        <div class="pill">✅ Captcha geslaagd</div>
+        <h1 style="margin-top:14px;">Gefeliciteerd 🎉 Je hebt mij gevonden.</h1>
+        <p style="max-width:620px;margin-top:8px;">
+          💘 Valentijn unlocked: <b>ik + jij</b>.<br/>
+          Afspraak? Jij kiest: <b>eten</b> of <b>iets gezellig thuis</b>.<br/>
+          (PS: ik ben serieus. PPS: je bent cute.)
+        </p>
+        <div class="row" style="justify-content:center;margin-top:16px;">
+          <button id="restartBtn">Nog eens spelen 🔁</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Zet hier welk antwoord correct is (1,2,3)
+    const CORRECT = "2";
+
+    const checkBtn = document.getElementById("checkBtn");
+    const msg = document.getElementById("message");
+    const screen1 = document.getElementById("screen1");
+    const screen2 = document.getElementById("screen2");
+    const restartBtn = document.getElementById("restartBtn");
+
+    function getPick() {
+      const el = document.querySelector('input[name="pick"]:checked');
+      return el ? el.value : null;
+    }
+
+    document.addEventListener("change", (e) => {
+      if (e.target && e.target.name === "pick") {
+        checkBtn.disabled = !getPick();
+        msg.textContent = "";
+      }
+    });
+
+    checkBtn.addEventListener("click", () => {
+      const pick = getPick();
+      if (!pick) return;
+
+      if (pick === CORRECT) {
+        msg.textContent = "Juist! 😏";
+        msg.className = "msg ok";
+        // kleine delay voor effect
+        setTimeout(() => {
+          screen1.classList.add("hidden");
+          screen2.classList.remove("hidden");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 500);
+      } else {
+        msg.textContent = "Nope 😅 probeer opnieuw.";
+        msg.className = "msg err";
+      }
+    });
+
+    restartBtn.addEventListener("click", () => {
+      // reset
+      document.querySelectorAll('input[name="pick"]').forEach(r => r.checked = false);
+      checkBtn.disabled = true;
+      msg.textContent = "";
+      screen2.classList.add("hidden");
+      screen1.classList.remove("hidden");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  </script>
+</body>
+</html>
