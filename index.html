@@ -2,148 +2,619 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Valentijn – Captcha</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Valentine Captcha</title>
   <style>
-    body{font-family:system-ui,Segoe UI,Arial;margin:0;background:#0b0b0f;color:#fff}
-    .wrap{max-width:900px;margin:0 auto;padding:28px}
-    .card{background:#141422;border:1px solid #2a2a3a;border-radius:18px;padding:20px}
-    h1{margin:0 0 10px;font-size:28px}
-    p{margin:0 0 14px;opacity:.9;line-height:1.4}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:14px}
-    .opt{background:#10101a;border:1px solid #2a2a3a;border-radius:16px;overflow:hidden;cursor:pointer;transition:.15s}
-    .opt:hover{transform:translateY(-2px);border-color:#4a4a66}
-    .opt img{width:100%;height:220px;object-fit:cover;display:block}
-    .opt .bar{display:flex;gap:10px;align-items:center;padding:10px 12px}
-    .opt input{transform:scale(1.2)}
-    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:14px}
-    button{background:#fff;color:#111;border:0;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
-    button:disabled{opacity:.4;cursor:not-allowed}
-    .msg{margin-top:10px;font-weight:700}
-    .ok{color:#3ddc97}
-    .err{color:#ff6b6b}
-    .small{opacity:.7;font-size:12px;margin-top:10px}
-    .hidden{display:none}
-    .center{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center}
-    .pill{display:inline-block;border:1px solid #2a2a3a;border-radius:999px;padding:6px 10px;opacity:.85}
-    a{color:#9ad1ff}
+    :root{
+      --bg:#0b0b10;
+      --card:#121225;
+      --stroke:#2a2a44;
+      --text:#ffffff;
+      --muted:rgba(255,255,255,.72);
+      --pink:#ff4fa6;
+      --pink2:#ffb3d8;
+      --rose:#ff2d55;
+      --good:#3ddc97;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x:hidden;
+    }
+    .wrap{
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 18px 48px;
+    }
+
+    /* ---------- shared cards ---------- */
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    h1,h2{margin:0}
+    p{margin:0; color: var(--muted); line-height:1.45}
+
+    /* ---------- transitions ---------- */
+    .screen{display:none; min-height: calc(100vh - 76px);}
+    .screen.active{display:block;}
+    .fade-in{animation: fadeIn .35s ease-out both;}
+    @keyframes fadeIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}
+
+    /* ---------- Screen 1: loader ---------- */
+    .loader-center{
+      min-height: calc(100vh - 76px);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .verify{
+      width:min(560px, 100%);
+      text-align:center;
+      padding: 26px 20px;
+    }
+    .spinner{
+      width:56px;height:56px;
+      border-radius:999px;
+      border: 6px solid rgba(255,255,255,.14);
+      border-top-color: rgba(255,255,255,.92);
+      margin: 0 auto 14px;
+      animation: spin .85s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .verify-title{
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      margin-bottom: 6px;
+    }
+    .verify-sub{
+      font-size: 13px;
+      color: rgba(255,255,255,.68);
+      margin-bottom: 14px;
+    }
+    .progress{
+      height:10px;
+      background: rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:999px;
+      overflow:hidden;
+    }
+    .bar{
+      height:100%;
+      width: 0%;
+      background: linear-gradient(90deg, rgba(255,255,255,.92), rgba(255,79,166,.92));
+      border-radius:999px;
+      animation: load 2.1s ease-in-out forwards;
+    }
+    @keyframes load{to{width:100%}}
+    .tiny{
+      margin-top:12px;
+      font-size: 12px;
+      color: rgba(255,255,255,.55);
+    }
+
+    /* ---------- Screen 2: captcha ---------- */
+    .captcha-head{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .badge{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 8px 10px;
+      border:1px solid rgba(255,255,255,.14);
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      font-size: 12px;
+      color: rgba(255,255,255,.74);
+      white-space: nowrap;
+    }
+    .badge-dot{
+      width:8px;height:8px;border-radius:999px;background: var(--pink);
+      box-shadow: 0 0 0 3px rgba(255,79,166,.18);
+    }
+
+    .captcha-title{
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing:.2px;
+      margin-bottom: 6px;
+    }
+    .captcha-sub{font-size: 13px;}
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+    @media (max-width: 720px){
+      .grid{grid-template-columns: repeat(2, 1fr);}
+    }
+    .tile{
+      position:relative;
+      border-radius: 16px;
+      overflow:hidden;
+      background: rgba(255,255,255,.03);
+      border: 1px solid rgba(255,255,255,.10);
+      cursor:pointer;
+      user-select:none;
+      transform: translateY(0);
+      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
+      min-height: 150px;
+    }
+    .tile:hover{
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,.22);
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+    }
+    .tile img{
+      width:100%;
+      height: 190px;
+      object-fit: cover;
+      display:block;
+      filter: saturate(1.02) contrast(1.02);
+    }
+    .tile .overlay{
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.35));
+      opacity: .9;
+      pointer-events:none;
+    }
+    .check{
+      position:absolute;
+      top:10px; right:10px;
+      width:34px;height:34px;border-radius:999px;
+      display:flex; align-items:center; justify-content:center;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.16);
+      backdrop-filter: blur(8px);
+      transform: scale(.92);
+      opacity: .0;
+      transition: opacity .12s ease, transform .12s ease;
+      pointer-events:none;
+    }
+    .check svg{width:18px;height:18px;fill:#fff}
+    .tile.selected{
+      border-color: rgba(255,79,166,.75);
+      box-shadow: 0 18px 60px rgba(255,79,166,.12);
+    }
+    .tile.selected .check{
+      opacity: 1;
+      transform: scale(1);
+      background: rgba(255,79,166,.28);
+      border-color: rgba(255,79,166,.55);
+    }
+
+    .footer-row{
+      margin-top: 14px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .counter{
+      font-weight: 800;
+      font-size: 13px;
+      color: rgba(255,255,255,.82);
+    }
+    .btn{
+      border:0;
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-weight: 900;
+      cursor:pointer;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+    .btn:active{transform: translateY(1px)}
+    .btn-primary{
+      background: linear-gradient(90deg, var(--pink), #ff7ac2);
+      color:#0b0b10;
+      box-shadow: 0 16px 46px rgba(255,79,166,.18);
+    }
+    .btn-primary:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
+    .btn-ghost{
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.9);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    /* ---------- Screen 3: Valentine ---------- */
+    .valentine{
+      min-height: calc(100vh - 76px);
+      position:relative;
+      overflow:hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: var(--shadow);
+      background:
+        radial-gradient(1100px 650px at 20% 18%, rgba(255,255,255,.35), transparent 55%),
+        radial-gradient(900px 560px at 80% 22%, rgba(255,79,166,.40), transparent 55%),
+        linear-gradient(180deg, #ff6fb7, #ff2f78 70%, #ff3d8f);
+    }
+    .val-inner{
+      position:relative;
+      z-index:2;
+      padding: 46px 20px;
+      text-align:center;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      min-height: calc(100vh - 76px);
+    }
+    .big{
+      font-size: clamp(34px, 5vw, 64px);
+      font-weight: 1000;
+      letter-spacing: 1px;
+      text-shadow: 0 14px 50px rgba(0,0,0,.25);
+      margin-bottom: 12px;
+    }
+    .subbig{
+      font-size: clamp(14px, 2.2vw, 20px);
+      font-weight: 800;
+      color: rgba(255,255,255,.92);
+      max-width: 720px;
+    }
+    .pill{
+      margin-top: 16px;
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.25);
+      backdrop-filter: blur(8px);
+      font-weight: 900;
+    }
+    .pill span{opacity:.95}
+
+    .val-actions{
+      margin-top: 18px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:center;
+    }
+
+    /* Falling hearts */
+    .float-layer{
+      position:absolute; inset:0;
+      z-index:1;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    .heart{
+      position:absolute;
+      top:-10vh;
+      width: 18px;
+      height: 18px;
+      transform: rotate(45deg);
+      opacity: .85;
+      animation: fall linear forwards;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.15));
+    }
+    .heart::before, .heart::after{
+      content:"";
+      position:absolute;
+      width: 18px;
+      height: 18px;
+      background: rgba(255,255,255,.9);
+      border-radius: 50%;
+    }
+    .heart{
+      background: rgba(255,255,255,.9);
+    }
+    .heart::before{ left:-9px; top:0; }
+    .heart::after{ left:0; top:-9px; }
+
+    @keyframes fall{
+      to{
+        transform: translateY(120vh) rotate(45deg);
+        opacity: .0;
+      }
+    }
+
+    /* Roses (emoji) floating */
+    .rose{
+      position:absolute;
+      bottom:-12vh;
+      font-size: 26px;
+      opacity: .92;
+      animation: rise linear forwards;
+      filter: drop-shadow(0 16px 20px rgba(0,0,0,.18));
+    }
+    @keyframes rise{
+      to{
+        transform: translateY(-120vh) rotate(18deg);
+        opacity: 0;
+      }
+    }
+
+    /* small helper */
+    code{
+      background: rgba(0,0,0,.22);
+      padding: 2px 6px;
+      border-radius: 8px;
+      border:1px solid rgba(255,255,255,.14);
+      color: rgba(255,255,255,.92);
+    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
 
-    <!-- Scherm 1 -->
-    <div id="screen1" class="card">
-      <h1>🕵️‍♀️ Captcha: “Welke ben ik?”</h1>
-      <p>Kies de juiste foto van mij. Als je juist zit, unlock je je Valentijn-boodschap 😏</p>
-
-      <div class="grid" id="grid">
-        <!-- Vervang de src naar jouw eigen foto’s -->
-        <label class="opt">
-          <img src="https://picsum.photos/id/1027/600/600" alt="optie 1">
-          <div class="bar">
-            <input type="radio" name="pick" value="1">
-            <span>Deze is mij</span>
-          </div>
-        </label>
-
-        <label class="opt">
-          <img src="https://picsum.photos/id/1005/600/600" alt="optie 2">
-          <div class="bar">
-            <input type="radio" name="pick" value="2">
-            <span>Deze is mij</span>
-          </div>
-        </label>
-
-        <label class="opt">
-          <img src="https://picsum.photos/id/1011/600/600" alt="optie 3">
-          <div class="bar">
-            <input type="radio" name="pick" value="3">
-            <span>Deze is mij</span>
-          </div>
-        </label>
-      </div>
-
-      <div class="row">
-        <button id="checkBtn" disabled>Check ✅</button>
-        <span class="pill">Tip: als je fout zit, mag je opnieuw 😄</span>
-      </div>
-
-      <div id="message" class="msg"></div>
-      <div class="small">
-        Foto’s aanpassen: vervang in de HTML de 3 <code>img src</code>-links naar jouw eigen foto’s.
-        <br/>Correcte optie aanpassen: zie <code>CORRECT = "2"</code> in de JS.
-      </div>
-    </div>
-
-    <!-- Scherm 2 (succes) -->
-    <div id="screen2" class="card hidden">
-      <div class="center">
-        <div class="pill">✅ Captcha geslaagd</div>
-        <h1 style="margin-top:14px;">Gefeliciteerd 🎉 Je hebt mij gevonden.</h1>
-        <p style="max-width:620px;margin-top:8px;">
-          💘 Valentijn unlocked: <b>ik + jij</b>.<br/>
-          Afspraak? Jij kiest: <b>eten</b> of <b>iets gezellig thuis</b>.<br/>
-          (PS: ik ben serieus. PPS: je bent cute.)
-        </p>
-        <div class="row" style="justify-content:center;margin-top:16px;">
-          <button id="restartBtn">Nog eens spelen 🔁</button>
+    <!-- SCREEN 1: LOADING / VERIFYING -->
+    <section id="s1" class="screen active fade-in">
+      <div class="loader-center">
+        <div class="card verify">
+          <div class="spinner"></div>
+          <div class="verify-title">Verifying you’re human</div>
+          <div class="verify-sub">Please wait while we confirm your browser…</div>
+          <div class="progress"><div class="bar"></div></div>
+          <div class="tiny">Security check • Valentine Systems™</div>
         </div>
       </div>
-    </div>
+    </section>
+
+    <!-- SCREEN 2: CAPTCHA -->
+    <section id="s2" class="screen fade-in">
+      <div class="card">
+        <div class="captcha-head">
+          <div>
+            <div class="captcha-title">Duid jouw valentijn aan 💘</div>
+            <p class="captcha-sub">Klik alle foto’s van “mij” aan (je moet <b>alle 9</b> selecteren 😏).</p>
+          </div>
+          <div class="badge"><span class="badge-dot"></span> Captcha challenge</div>
+        </div>
+
+        <div class="grid" id="grid">
+          <!-- PLACEHOLDERS: vervang later door jouw 9 foto-URLs -->
+          <!-- Tip: zet je foto’s straks in dezelfde repo (bv. /img/1.jpg) en gebruik dan: src="img/1.jpg" -->
+          <div class="tile" data-id="1"><img src="https://picsum.photos/seed/me1/800/800" alt="foto 1"><div class="overlay"></div><div class="check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
+          </div></div>
+
+          <div class="tile" data-id="2"><img src="https://picsum.photos/seed/me2/800/800" alt="foto 2"><div class="overlay"></div><div class="check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
+          </div></div>
+
+          <div class="tile" data-id="3"><img src="https://picsum.photos/seed/me3/800/800" alt="foto 3"><div class="overlay"></div><div class="check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
+          </div></div>
+
+          <div class="tile" data-id="4"><img src="https://picsum.photos/seed/me4/800/800" alt="foto 4"><div class="overlay"></div><div class="check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
+          </div></div>
+
+          <div class="tile" data-id="5"><img src="https://picsum.photos/seed/me5/800/800" alt="foto 5"><div class="overlay"></div><div class="check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
+          </div></div>
+
+          <div class="tile" data-id="6"><img src="https://picsum.photos/seed/me6/800/800" alt="foto 6"><div class="overlay"></div><div class="check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
+          </div></div>
+
+          <div class="tile" data-id="7"><img src="https://picsum.photos/seed/me7/800/800" alt="foto 7"><div class="overlay"></div><div class="check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
+          </div></div>
+
+          <div class="tile" data-id="8"><img src="https://picsum.photos/seed/me8/800/800" alt="foto 8"><div class="overlay"></div><div class="check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
+          </div></div>
+
+          <div class="tile" data-id="9"><img src="https://picsum.photos/seed/me9/800/800" alt="foto 9"><div class="overlay"></div><div class="check" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
+          </div></div>
+        </div>
+
+        <div class="footer-row">
+          <div class="counter" id="counter">Geselecteerd: 0 / 9</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn btn-ghost" id="resetBtn" type="button">Reset</button>
+            <button class="btn btn-primary" id="continueBtn" type="button" disabled>Verder 💘</button>
+          </div>
+        </div>
+
+        <p style="margin-top:12px; font-size:12px; color: rgba(255,255,255,.58);">
+          Later je echte foto’s erin? Vervang de 9 <code>img src</code> links hierboven.
+        </p>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: VALENTINE -->
+    <section id="s3" class="screen fade-in">
+      <div class="valentine">
+        <div class="float-layer" id="floatLayer"></div>
+
+        <div class="val-inner">
+          <div class="big">YOU ARE MY VALENTINE 💖</div>
+          <div class="subbig">
+            Oké… je hebt het bewijs geleverd.  
+            Nu is het officieel: jij + ik = Valentijn. 🌹
+          </div>
+
+          <div class="pill"><span>Unlocked</span> • <span>Hearts</span> • <span>Roses</span></div>
+
+          <div class="val-actions">
+            <button class="btn btn-ghost" id="backBtn" type="button">Terug</button>
+            <button class="btn btn-primary" id="replayBtn" type="button">Nog eens 😏</button>
+          </div>
+        </div>
+      </div>
+    </section>
 
   </div>
 
   <script>
-    // Zet hier welk antwoord correct is (1,2,3)
-    const CORRECT = "2";
+    // ---------- Screen switching ----------
+    const s1 = document.getElementById("s1");
+    const s2 = document.getElementById("s2");
+    const s3 = document.getElementById("s3");
 
-    const checkBtn = document.getElementById("checkBtn");
-    const msg = document.getElementById("message");
-    const screen1 = document.getElementById("screen1");
-    const screen2 = document.getElementById("screen2");
-    const restartBtn = document.getElementById("restartBtn");
-
-    function getPick() {
-      const el = document.querySelector('input[name="pick"]:checked');
-      return el ? el.value : null;
+    function show(screen){
+      [s1,s2,s3].forEach(s => s.classList.remove("active"));
+      screen.classList.add("active");
+      window.scrollTo({top:0, behavior:"smooth"});
     }
 
-    document.addEventListener("change", (e) => {
-      if (e.target && e.target.name === "pick") {
-        checkBtn.disabled = !getPick();
-        msg.textContent = "";
+    // Auto loader -> captcha
+    // (typische captcha: even "verifying", dan doorschakelen)
+    setTimeout(() => show(s2), 2300);
+
+    // ---------- Captcha logic ----------
+    const tiles = Array.from(document.querySelectorAll(".tile"));
+    const counter = document.getElementById("counter");
+    const continueBtn = document.getElementById("continueBtn");
+    const resetBtn = document.getElementById("resetBtn");
+
+    function selectedCount(){
+      return tiles.filter(t => t.classList.contains("selected")).length;
+    }
+
+    function updateUI(){
+      const n = selectedCount();
+      counter.textContent = `Geselecteerd: ${n} / 9`;
+      continueBtn.disabled = (n !== 9);
+    }
+
+    tiles.forEach(tile => {
+      tile.addEventListener("click", () => {
+        tile.classList.toggle("selected");
+        updateUI();
+      });
+    });
+
+    resetBtn.addEventListener("click", () => {
+      tiles.forEach(t => t.classList.remove("selected"));
+      updateUI();
+    });
+
+    continueBtn.addEventListener("click", () => {
+      // Als alles geselecteerd is -> finale scherm
+      if (selectedCount() === 9){
+        show(s3);
+        startValentineEffects();
       }
     });
 
-    checkBtn.addEventListener("click", () => {
-      const pick = getPick();
-      if (!pick) return;
+    // ---------- Valentine effects ----------
+    const floatLayer = document.getElementById("floatLayer");
+    let effectsRunning = false;
+    let heartInterval = null;
+    let roseInterval = null;
 
-      if (pick === CORRECT) {
-        msg.textContent = "Juist! 😏";
-        msg.className = "msg ok";
-        // kleine delay voor effect
-        setTimeout(() => {
-          screen1.classList.add("hidden");
-          screen2.classList.remove("hidden");
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }, 500);
-      } else {
-        msg.textContent = "Nope 😅 probeer opnieuw.";
-        msg.className = "msg err";
-      }
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+
+    function spawnHeart(){
+      const h = document.createElement("div");
+      h.className = "heart";
+      const left = rand(0, 100);
+      const dur = rand(4.8, 8.5);
+      const size = rand(12, 26);
+      const opacity = rand(0.55, 0.95);
+
+      h.style.left = left + "vw";
+      h.style.animationDuration = dur + "s";
+      h.style.width = size + "px";
+      h.style.height = size + "px";
+      h.style.opacity = opacity;
+
+      // beetje variatie in kleur
+      const tint = Math.random();
+      const color = tint < 0.35 ? "rgba(255,255,255,.92)"
+                  : tint < 0.70 ? "rgba(255,230,245,.95)"
+                  : "rgba(255,180,220,.95)";
+      h.style.background = color;
+      // pseudo-elements erven via background? -> we zetten ze via CSS, maar voor variatie laten we het hier op het hoofdvlak
+      // (goed genoeg voor het effect)
+
+      floatLayer.appendChild(h);
+      setTimeout(() => h.remove(), dur * 1000 + 200);
+    }
+
+    function spawnRose(){
+      const r = document.createElement("div");
+      r.className = "rose";
+      r.textContent = "🌹";
+      const left = rand(0, 100);
+      const dur = rand(6.5, 11.5);
+      const size = rand(18, 34);
+      r.style.left = left + "vw";
+      r.style.animationDuration = dur + "s";
+      r.style.fontSize = size + "px";
+      r.style.transform = `rotate(${rand(-12, 12)}deg)`;
+      floatLayer.appendChild(r);
+      setTimeout(() => r.remove(), dur * 1000 + 200);
+    }
+
+    function startValentineEffects(){
+      if (effectsRunning) return;
+      effectsRunning = true;
+
+      // Clear any previous stuff
+      floatLayer.innerHTML = "";
+
+      // Start spawners
+      heartInterval = setInterval(() => {
+        // spawn in bursts
+        spawnHeart();
+        if (Math.random() > 0.55) spawnHeart();
+      }, 220);
+
+      roseInterval = setInterval(() => {
+        spawnRose();
+        if (Math.random() > 0.70) spawnRose();
+      }, 900);
+    }
+
+    function stopValentineEffects(){
+      effectsRunning = false;
+      clearInterval(heartInterval);
+      clearInterval(roseInterval);
+      heartInterval = null;
+      roseInterval = null;
+      floatLayer.innerHTML = "";
+    }
+
+    // Buttons on final screen
+    document.getElementById("backBtn").addEventListener("click", () => {
+      stopValentineEffects();
+      show(s2);
     });
 
-    restartBtn.addEventListener("click", () => {
-      // reset
-      document.querySelectorAll('input[name="pick"]').forEach(r => r.checked = false);
-      checkBtn.disabled = true;
-      msg.textContent = "";
-      screen2.classList.add("hidden");
-      screen1.classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
+    document.getElementById("replayBtn").addEventListener("click", () => {
+      stopValentineEffects();
+      tiles.forEach(t => t.classList.remove("selected"));
+      updateUI();
+      show(s1);
+      // restart loader flow
+      setTimeout(() => show(s2), 2300);
     });
+
+    // Init
+    updateUI();
   </script>
 </body>
 </html>
