@@ -3,138 +3,221 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Valentine Captcha</title>
+  <title>Security Check</title>
   <style>
     :root{
-      --bg:#0b0b10;
-      --card:#121225;
-      --stroke:#2a2a44;
-      --text:#ffffff;
-      --muted:rgba(255,255,255,.72);
+      --bg:#0b0d12;
+      --panel:#0f1320;
+      --panel2:#0c0f1a;
+      --stroke:rgba(255,255,255,.12);
+      --stroke2:rgba(255,255,255,.18);
+      --text:rgba(255,255,255,.92);
+      --muted:rgba(255,255,255,.62);
+      --muted2:rgba(255,255,255,.48);
+      --shadow:0 18px 70px rgba(0,0,0,.55);
+      --r:18px;
+      --accent:#7bd2ff;
+      --accent2:#a78bfa;
+      --good:#39d98a;
+      --warn:#ffd166;
       --pink:#ff4fa6;
-      --pink2:#ffb3d8;
-      --rose:#ff2d55;
-      --good:#3ddc97;
-      --shadow: 0 18px 60px rgba(0,0,0,.45);
-      --radius: 18px;
     }
 
     *{box-sizing:border-box}
     body{
       margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1000px 700px at 20% 20%, rgba(123,210,255,.08), transparent 55%),
+                  radial-gradient(900px 600px at 80% 30%, rgba(167,139,250,.08), transparent 55%),
+                  var(--bg);
+      color:var(--text);
       overflow-x:hidden;
     }
+
+    /* subtle "internet" noise */
+    body:before{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      background:
+        repeating-linear-gradient(180deg, rgba(255,255,255,.03) 0px, rgba(255,255,255,.03) 1px, transparent 2px, transparent 4px);
+      opacity:.06;
+      mix-blend-mode: overlay;
+    }
+    body:after{
+      content:"";
+      position:fixed; inset:0;
+      pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.22'/%3E%3C/svg%3E");
+      opacity:.055;
+    }
+
     .wrap{
       max-width: 980px;
       margin: 0 auto;
-      padding: 28px 18px 48px;
+      padding: 26px 16px 44px;
     }
 
-    /* ---------- shared cards ---------- */
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border: 1px solid var(--stroke);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 18px;
-    }
-    h1,h2{margin:0}
-    p{margin:0; color: var(--muted); line-height:1.45}
-
-    /* ---------- transitions ---------- */
-    .screen{display:none; min-height: calc(100vh - 76px);}
+    .screen{display:none; min-height: calc(100vh - 70px);}
     .screen.active{display:block;}
-    .fade-in{animation: fadeIn .35s ease-out both;}
+    .fade-in{animation: fadeIn .28s ease-out both;}
     @keyframes fadeIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}
 
-    /* ---------- Screen 1: loader ---------- */
-    .loader-center{
-      min-height: calc(100vh - 76px);
+    /* ---------- shared panel ---------- */
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border: 1px solid var(--stroke);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panel-head{
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background: linear-gradient(90deg, rgba(123,210,255,.06), rgba(167,139,250,.06));
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      font-weight:900;
+      letter-spacing:.4px;
+      font-size: 12px;
+      color: rgba(255,255,255,.8);
+      text-transform:uppercase;
+    }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: linear-gradient(180deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 0 4px rgba(123,210,255,.10);
+    }
+    .status{
+      font-size:12px;
+      color: rgba(255,255,255,.62);
+      display:flex; align-items:center; gap:8px;
+      white-space:nowrap;
+    }
+    .pill{
+      padding: 6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.18);
+    }
+
+    /* ---------- Screen 1: verifying ---------- */
+    .center{
+      min-height: calc(100vh - 70px);
       display:flex;
       align-items:center;
       justify-content:center;
     }
     .verify{
-      width:min(560px, 100%);
-      text-align:center;
-      padding: 26px 20px;
+      width: min(560px, 100%);
+    }
+    .verify-body{
+      padding: 18px 16px 16px;
+      background: linear-gradient(180deg, rgba(0,0,0,.06), transparent);
+    }
+    .row{
+      display:flex; align-items:flex-start; justify-content:space-between; gap:14px;
+      flex-wrap:wrap;
+    }
+    .title{
+      font-size: 18px;
+      font-weight: 900;
+      margin:0 0 6px;
+      letter-spacing:.2px;
+    }
+    .sub{
+      margin:0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height:1.45;
+    }
+    .checkline{
+      margin-top: 14px;
+      display:flex; align-items:center; gap:10px;
+      padding: 12px 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      background: rgba(0,0,0,.18);
+    }
+    .checkbox{
+      width:18px;height:18px;border-radius:4px;
+      border: 2px solid rgba(255,255,255,.30);
+      position:relative;
+      flex:0 0 auto;
+      background: rgba(255,255,255,.03);
+    }
+    .checkbox:after{
+      content:"";
+      position:absolute; inset:2px;
+      background: linear-gradient(180deg, rgba(123,210,255,.95), rgba(167,139,250,.95));
+      border-radius:2px;
+      opacity:0;
+      transform: scale(.7);
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    .checking .checkbox:after{
+      opacity:1;
+      transform: scale(1);
     }
     .spinner{
-      width:56px;height:56px;
-      border-radius:999px;
-      border: 6px solid rgba(255,255,255,.14);
-      border-top-color: rgba(255,255,255,.92);
-      margin: 0 auto 14px;
-      animation: spin .85s linear infinite;
+      width:16px;height:16px;border-radius:999px;
+      border:2px solid rgba(255,255,255,.22);
+      border-top-color: rgba(255,255,255,.88);
+      animation: spin .8s linear infinite;
+      margin-left:auto;
     }
     @keyframes spin{to{transform:rotate(360deg)}}
-    .verify-title{
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: .2px;
-      margin-bottom: 6px;
-    }
-    .verify-sub{
-      font-size: 13px;
-      color: rgba(255,255,255,.68);
-      margin-bottom: 14px;
-    }
     .progress{
+      margin-top: 12px;
       height:10px;
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
       border-radius:999px;
       overflow:hidden;
     }
     .bar{
       height:100%;
       width: 0%;
-      background: linear-gradient(90deg, rgba(255,255,255,.92), rgba(255,79,166,.92));
-      border-radius:999px;
+      background: linear-gradient(90deg, rgba(123,210,255,.92), rgba(167,139,250,.92));
       animation: load 2.1s ease-in-out forwards;
     }
     @keyframes load{to{width:100%}}
     .tiny{
-      margin-top:12px;
-      font-size: 12px;
-      color: rgba(255,255,255,.55);
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--muted2);
     }
 
-    /* ---------- Screen 2: captcha ---------- */
-    .captcha-head{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-    .badge{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding: 8px 10px;
-      border:1px solid rgba(255,255,255,.14);
-      border-radius: 999px;
-      background: rgba(255,255,255,.04);
-      font-size: 12px;
-      color: rgba(255,255,255,.74);
-      white-space: nowrap;
-    }
-    .badge-dot{
-      width:8px;height:8px;border-radius:999px;background: var(--pink);
-      box-shadow: 0 0 0 3px rgba(255,79,166,.18);
+    /* ---------- Screen 2: captcha grid ---------- */
+    .captcha-body{
+      padding: 16px;
+      background: linear-gradient(180deg, rgba(0,0,0,.06), transparent);
     }
 
     .captcha-title{
-      font-size: 22px;
-      font-weight: 900;
-      letter-spacing:.2px;
-      margin-bottom: 6px;
+      margin:0;
+      font-weight: 1000;
+      font-size: 14px;
+      letter-spacing: .9px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.88);
     }
-    .captcha-sub{font-size: 13px;}
+    .captcha-title b{
+      color: rgba(255,255,255,.98);
+      text-decoration: underline;
+      text-underline-offset: 6px;
+      text-decoration-thickness: 2px;
+    }
+    .captcha-sub{
+      margin-top: 6px;
+      font-size: 13px;
+      color: rgba(255,255,255,.62);
+    }
 
     .grid{
       display:grid;
@@ -145,93 +228,90 @@
     @media (max-width: 720px){
       .grid{grid-template-columns: repeat(2, 1fr);}
     }
+
     .tile{
       position:relative;
-      border-radius: 16px;
+      border-radius: 14px;
       overflow:hidden;
-      background: rgba(255,255,255,.03);
-      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.02);
+      border: 1px solid rgba(255,255,255,.12);
       cursor:pointer;
       user-select:none;
-      transform: translateY(0);
-      transition: transform .12s ease, border-color .12s ease, box-shadow .12s ease;
-      min-height: 150px;
+      transition: transform .10s ease, border-color .10s ease, box-shadow .10s ease, filter .10s ease;
     }
     .tile:hover{
       transform: translateY(-2px);
       border-color: rgba(255,255,255,.22);
-      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      box-shadow: 0 14px 44px rgba(0,0,0,.45);
     }
     .tile img{
       width:100%;
       height: 190px;
       object-fit: cover;
       display:block;
-      filter: saturate(1.02) contrast(1.02);
+      filter: saturate(1) contrast(1.02);
     }
-    .tile .overlay{
+    .tile .shade{
       position:absolute; inset:0;
-      background: linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.35));
-      opacity: .9;
+      background: linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.40));
       pointer-events:none;
+      opacity:.9;
     }
     .check{
       position:absolute;
       top:10px; right:10px;
-      width:34px;height:34px;border-radius:999px;
+      width:30px;height:30px;border-radius:10px;
       display:flex; align-items:center; justify-content:center;
-      background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.16);
-      backdrop-filter: blur(8px);
-      transform: scale(.92);
-      opacity: .0;
-      transition: opacity .12s ease, transform .12s ease;
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(10px);
+      opacity:0;
+      transform: translateY(-2px) scale(.96);
+      transition: opacity .12s ease, transform .12s ease, background .12s ease;
       pointer-events:none;
     }
     .check svg{width:18px;height:18px;fill:#fff}
     .tile.selected{
-      border-color: rgba(255,79,166,.75);
-      box-shadow: 0 18px 60px rgba(255,79,166,.12);
+      border-color: rgba(123,210,255,.70);
+      box-shadow: 0 18px 70px rgba(123,210,255,.12);
     }
     .tile.selected .check{
-      opacity: 1;
-      transform: scale(1);
-      background: rgba(255,79,166,.28);
-      border-color: rgba(255,79,166,.55);
+      opacity:1;
+      transform: translateY(0) scale(1);
+      background: rgba(57,217,138,.22);
+      border-color: rgba(57,217,138,.35);
     }
 
-    .footer-row{
+    .footer{
       margin-top: 14px;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 10px;
+      flex-wrap:wrap;
     }
     .counter{
-      font-weight: 800;
-      font-size: 13px;
-      color: rgba(255,255,255,.82);
+      font-weight: 900;
+      font-size: 12px;
+      letter-spacing:.3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.70);
     }
     .btn{
       border:0;
       border-radius: 14px;
-      padding: 12px 14px;
-      font-weight: 900;
+      padding: 11px 14px;
+      font-weight: 1000;
       cursor:pointer;
       transition: transform .12s ease, opacity .12s ease;
     }
     .btn:active{transform: translateY(1px)}
     .btn-primary{
-      background: linear-gradient(90deg, var(--pink), #ff7ac2);
-      color:#0b0b10;
-      box-shadow: 0 16px 46px rgba(255,79,166,.18);
+      background: linear-gradient(90deg, rgba(123,210,255,.92), rgba(167,139,250,.92));
+      color:#0b0d12;
+      box-shadow: 0 18px 60px rgba(123,210,255,.14);
     }
-    .btn-primary:disabled{
-      opacity:.45;
-      cursor:not-allowed;
-      box-shadow:none;
-    }
+    .btn-primary:disabled{opacity:.45; cursor:not-allowed; box-shadow:none;}
     .btn-ghost{
       background: rgba(255,255,255,.06);
       color: rgba(255,255,255,.9);
@@ -240,7 +320,7 @@
 
     /* ---------- Screen 3: Valentine ---------- */
     .valentine{
-      min-height: calc(100vh - 76px);
+      min-height: calc(100vh - 70px);
       position:relative;
       overflow:hidden;
       border-radius: 22px;
@@ -248,47 +328,34 @@
       box-shadow: var(--shadow);
       background:
         radial-gradient(1100px 650px at 20% 18%, rgba(255,255,255,.35), transparent 55%),
-        radial-gradient(900px 560px at 80% 22%, rgba(255,79,166,.40), transparent 55%),
+        radial-gradient(900px 560px at 80% 22%, rgba(255,79,166,.45), transparent 55%),
         linear-gradient(180deg, #ff6fb7, #ff2f78 70%, #ff3d8f);
     }
     .val-inner{
       position:relative;
       z-index:2;
-      padding: 46px 20px;
+      padding: 46px 18px;
       text-align:center;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
-      min-height: calc(100vh - 76px);
+      min-height: calc(100vh - 70px);
     }
     .big{
-      font-size: clamp(34px, 5vw, 64px);
-      font-weight: 1000;
+      font-size: clamp(34px, 5vw, 66px);
+      font-weight: 1100;
       letter-spacing: 1px;
-      text-shadow: 0 14px 50px rgba(0,0,0,.25);
+      text-shadow: 0 16px 60px rgba(0,0,0,.25);
       margin-bottom: 12px;
     }
     .subbig{
       font-size: clamp(14px, 2.2vw, 20px);
-      font-weight: 800;
+      font-weight: 850;
       color: rgba(255,255,255,.92);
       max-width: 720px;
+      line-height:1.35;
     }
-    .pill{
-      margin-top: 16px;
-      display:inline-flex;
-      gap:10px;
-      align-items:center;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.18);
-      border: 1px solid rgba(255,255,255,.25);
-      backdrop-filter: blur(8px);
-      font-weight: 900;
-    }
-    .pill span{opacity:.95}
-
     .val-actions{
       margin-top: 18px;
       display:flex;
@@ -297,7 +364,7 @@
       justify-content:center;
     }
 
-    /* Falling hearts */
+    /* Hearts + roses effects */
     .float-layer{
       position:absolute; inset:0;
       z-index:1;
@@ -319,23 +386,17 @@
       position:absolute;
       width: 18px;
       height: 18px;
-      background: rgba(255,255,255,.9);
+      background: rgba(255,255,255,.92);
       border-radius: 50%;
     }
-    .heart{
-      background: rgba(255,255,255,.9);
-    }
+    .heart{ background: rgba(255,255,255,.92); }
     .heart::before{ left:-9px; top:0; }
     .heart::after{ left:0; top:-9px; }
 
     @keyframes fall{
-      to{
-        transform: translateY(120vh) rotate(45deg);
-        opacity: .0;
-      }
+      to{ transform: translateY(120vh) rotate(45deg); opacity: 0; }
     }
 
-    /* Roses (emoji) floating */
     .rose{
       position:absolute;
       bottom:-12vh;
@@ -345,19 +406,7 @@
       filter: drop-shadow(0 16px 20px rgba(0,0,0,.18));
     }
     @keyframes rise{
-      to{
-        transform: translateY(-120vh) rotate(18deg);
-        opacity: 0;
-      }
-    }
-
-    /* small helper */
-    code{
-      background: rgba(0,0,0,.22);
-      padding: 2px 6px;
-      border-radius: 8px;
-      border:1px solid rgba(255,255,255,.14);
-      color: rgba(255,255,255,.92);
+      to{ transform: translateY(-120vh) rotate(18deg); opacity: 0; }
     }
   </style>
 </head>
@@ -365,81 +414,74 @@
 <body>
   <div class="wrap">
 
-    <!-- SCREEN 1: LOADING / VERIFYING -->
+    <!-- SCREEN 1: VERIFYING -->
     <section id="s1" class="screen active fade-in">
-      <div class="loader-center">
-        <div class="card verify">
-          <div class="spinner"></div>
-          <div class="verify-title">Verifying you’re human</div>
-          <div class="verify-sub">Please wait while we confirm your browser…</div>
-          <div class="progress"><div class="bar"></div></div>
-          <div class="tiny">Security check • Valentine Systems™</div>
+      <div class="center">
+        <div class="panel verify">
+          <div class="panel-head">
+            <div class="brand"><span class="dot"></span> Security</div>
+            <div class="status"><span class="pill">Checking…</span></div>
+          </div>
+
+          <div class="verify-body">
+            <div class="row">
+              <div>
+                <h1 class="title">Verify you’re human</h1>
+                <p class="sub">This quick check helps us keep things secure. Please wait…</p>
+              </div>
+            </div>
+
+            <div id="checkline" class="checkline">
+              <div class="checkbox" aria-hidden="true"></div>
+              <div style="text-align:left;">
+                <div style="font-weight:900; font-size:13px;">I’m not a robot</div>
+                <div style="color:var(--muted2); font-size:12px;">Validating browser integrity</div>
+              </div>
+              <div class="spinner" aria-hidden="true"></div>
+            </div>
+
+            <div class="progress"><div class="bar"></div></div>
+            <div class="tiny">Security check • Please do not refresh</div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- SCREEN 2: CAPTCHA -->
     <section id="s2" class="screen fade-in">
-      <div class="card">
-        <div class="captcha-head">
-          <div>
-            <div class="captcha-title">Duid jouw valentijn aan 💘</div>
-            <p class="captcha-sub">Klik alle foto’s van “mij” aan (je moet <b>alle 9</b> selecteren 😏).</p>
+      <div class="panel">
+        <div class="panel-head">
+          <div class="brand"><span class="dot"></span> Image selection</div>
+          <div class="status"><span class="pill" id="progressPill">0 / 9 selected</span></div>
+        </div>
+
+        <div class="captcha-body">
+          <h2 class="captcha-title">
+            SELECTEER ALLE FOTO’S VAN <b>JOUW VALENTIJN</b>
+          </h2>
+          <p class="captcha-sub">Verifieer als er geen meer over zijn.</p>
+
+          <div class="grid" id="grid">
+            <!-- placeholders: vervang later door jouw foto’s -->
+            <div class="tile" data-id="1"><img src="https://picsum.photos/seed/me1/800/800" alt="foto 1"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+            <div class="tile" data-id="2"><img src="https://picsum.photos/seed/me2/800/800" alt="foto 2"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+            <div class="tile" data-id="3"><img src="https://picsum.photos/seed/me3/800/800" alt="foto 3"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+            <div class="tile" data-id="4"><img src="https://picsum.photos/seed/me4/800/800" alt="foto 4"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+            <div class="tile" data-id="5"><img src="https://picsum.photos/seed/me5/800/800" alt="foto 5"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+            <div class="tile" data-id="6"><img src="https://picsum.photos/seed/me6/800/800" alt="foto 6"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+            <div class="tile" data-id="7"><img src="https://picsum.photos/seed/me7/800/800" alt="foto 7"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+            <div class="tile" data-id="8"><img src="https://picsum.photos/seed/me8/800/800" alt="foto 8"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
+            <div class="tile" data-id="9"><img src="https://picsum.photos/seed/me9/800/800" alt="foto 9"><div class="shade"></div><div class="check"><svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg></div></div>
           </div>
-          <div class="badge"><span class="badge-dot"></span> Captcha challenge</div>
-        </div>
 
-        <div class="grid" id="grid">
-          <!-- PLACEHOLDERS: vervang later door jouw 9 foto-URLs -->
-          <!-- Tip: zet je foto’s straks in dezelfde repo (bv. /img/1.jpg) en gebruik dan: src="img/1.jpg" -->
-          <div class="tile" data-id="1"><img src="https://picsum.photos/seed/me1/800/800" alt="foto 1"><div class="overlay"></div><div class="check" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
-          </div></div>
-
-          <div class="tile" data-id="2"><img src="https://picsum.photos/seed/me2/800/800" alt="foto 2"><div class="overlay"></div><div class="check" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
-          </div></div>
-
-          <div class="tile" data-id="3"><img src="https://picsum.photos/seed/me3/800/800" alt="foto 3"><div class="overlay"></div><div class="check" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
-          </div></div>
-
-          <div class="tile" data-id="4"><img src="https://picsum.photos/seed/me4/800/800" alt="foto 4"><div class="overlay"></div><div class="check" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
-          </div></div>
-
-          <div class="tile" data-id="5"><img src="https://picsum.photos/seed/me5/800/800" alt="foto 5"><div class="overlay"></div><div class="check" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
-          </div></div>
-
-          <div class="tile" data-id="6"><img src="https://picsum.photos/seed/me6/800/800" alt="foto 6"><div class="overlay"></div><div class="check" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
-          </div></div>
-
-          <div class="tile" data-id="7"><img src="https://picsum.photos/seed/me7/800/800" alt="foto 7"><div class="overlay"></div><div class="check" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
-          </div></div>
-
-          <div class="tile" data-id="8"><img src="https://picsum.photos/seed/me8/800/800" alt="foto 8"><div class="overlay"></div><div class="check" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
-          </div></div>
-
-          <div class="tile" data-id="9"><img src="https://picsum.photos/seed/me9/800/800" alt="foto 9"><div class="overlay"></div><div class="check" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M9.2 16.6 4.9 12.3l-1.4 1.4 5.7 5.7L21 7.6l-1.4-1.4z"/></svg>
-          </div></div>
-        </div>
-
-        <div class="footer-row">
-          <div class="counter" id="counter">Geselecteerd: 0 / 9</div>
-          <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn btn-ghost" id="resetBtn" type="button">Reset</button>
-            <button class="btn btn-primary" id="continueBtn" type="button" disabled>Verder 💘</button>
+          <div class="footer">
+            <div class="counter" id="counter">selected: 0 / 9</div>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn btn-ghost" id="resetBtn" type="button">Reset</button>
+              <button class="btn btn-primary" id="continueBtn" type="button" disabled>Verify</button>
+            </div>
           </div>
         </div>
-
-        <p style="margin-top:12px; font-size:12px; color: rgba(255,255,255,.58);">
-          Later je echte foto’s erin? Vervang de 9 <code>img src</code> links hierboven.
-        </p>
       </div>
     </section>
 
@@ -451,15 +493,13 @@
         <div class="val-inner">
           <div class="big">YOU ARE MY VALENTINE 💖</div>
           <div class="subbig">
-            Oké… je hebt het bewijs geleverd.  
+            Oké… je hebt het bewijs geleverd.<br/>
             Nu is het officieel: jij + ik = Valentijn. 🌹
           </div>
 
-          <div class="pill"><span>Unlocked</span> • <span>Hearts</span> • <span>Roses</span></div>
-
           <div class="val-actions">
-            <button class="btn btn-ghost" id="backBtn" type="button">Terug</button>
-            <button class="btn btn-primary" id="replayBtn" type="button">Nog eens 😏</button>
+            <button class="btn btn-ghost" id="backBtn" type="button">Back</button>
+            <button class="btn btn-primary" id="replayBtn" type="button">Replay</button>
           </div>
         </div>
       </div>
@@ -468,7 +508,6 @@
   </div>
 
   <script>
-    // ---------- Screen switching ----------
     const s1 = document.getElementById("s1");
     const s2 = document.getElementById("s2");
     const s3 = document.getElementById("s3");
@@ -479,23 +518,27 @@
       window.scrollTo({top:0, behavior:"smooth"});
     }
 
-    // Auto loader -> captcha
-    // (typische captcha: even "verifying", dan doorschakelen)
+    // loader checkbox "checks" half-way for realism
+    const checkline = document.getElementById("checkline");
+    setTimeout(() => checkline.classList.add("checking"), 900);
+
+    // loader -> captcha
     setTimeout(() => show(s2), 2300);
 
-    // ---------- Captcha logic ----------
+    // Captcha logic
     const tiles = Array.from(document.querySelectorAll(".tile"));
     const counter = document.getElementById("counter");
+    const progressPill = document.getElementById("progressPill");
     const continueBtn = document.getElementById("continueBtn");
     const resetBtn = document.getElementById("resetBtn");
 
     function selectedCount(){
       return tiles.filter(t => t.classList.contains("selected")).length;
     }
-
     function updateUI(){
       const n = selectedCount();
-      counter.textContent = `Geselecteerd: ${n} / 9`;
+      counter.textContent = `selected: ${n} / 9`;
+      progressPill.textContent = `${n} / 9 selected`;
       continueBtn.disabled = (n !== 9);
     }
 
@@ -511,27 +554,19 @@
       updateUI();
     });
 
-    continueBtn.addEventListener("click", () => {
-      // Als alles geselecteerd is -> finale scherm
-      if (selectedCount() === 9){
-        show(s3);
-        startValentineEffects();
-      }
-    });
-
-    // ---------- Valentine effects ----------
+    // Valentine effects
     const floatLayer = document.getElementById("floatLayer");
-    let effectsRunning = false;
     let heartInterval = null;
     let roseInterval = null;
+    let effectsRunning = false;
 
-    function rand(min, max){ return Math.random() * (max - min) + min; }
+    function rand(min,max){ return Math.random()*(max-min)+min; }
 
     function spawnHeart(){
       const h = document.createElement("div");
       h.className = "heart";
       const left = rand(0, 100);
-      const dur = rand(4.8, 8.5);
+      const dur  = rand(4.8, 8.5);
       const size = rand(12, 26);
       const opacity = rand(0.55, 0.95);
 
@@ -541,17 +576,8 @@
       h.style.height = size + "px";
       h.style.opacity = opacity;
 
-      // beetje variatie in kleur
-      const tint = Math.random();
-      const color = tint < 0.35 ? "rgba(255,255,255,.92)"
-                  : tint < 0.70 ? "rgba(255,230,245,.95)"
-                  : "rgba(255,180,220,.95)";
-      h.style.background = color;
-      // pseudo-elements erven via background? -> we zetten ze via CSS, maar voor variatie laten we het hier op het hoofdvlak
-      // (goed genoeg voor het effect)
-
       floatLayer.appendChild(h);
-      setTimeout(() => h.remove(), dur * 1000 + 200);
+      setTimeout(() => h.remove(), dur*1000 + 250);
     }
 
     function spawnRose(){
@@ -559,26 +585,22 @@
       r.className = "rose";
       r.textContent = "🌹";
       const left = rand(0, 100);
-      const dur = rand(6.5, 11.5);
+      const dur  = rand(6.5, 11.5);
       const size = rand(18, 34);
       r.style.left = left + "vw";
       r.style.animationDuration = dur + "s";
       r.style.fontSize = size + "px";
-      r.style.transform = `rotate(${rand(-12, 12)}deg)`;
+      r.style.transform = `rotate(${rand(-12,12)}deg)`;
       floatLayer.appendChild(r);
-      setTimeout(() => r.remove(), dur * 1000 + 200);
+      setTimeout(() => r.remove(), dur*1000 + 250);
     }
 
     function startValentineEffects(){
       if (effectsRunning) return;
       effectsRunning = true;
-
-      // Clear any previous stuff
       floatLayer.innerHTML = "";
 
-      // Start spawners
       heartInterval = setInterval(() => {
-        // spawn in bursts
         spawnHeart();
         if (Math.random() > 0.55) spawnHeart();
       }, 220);
@@ -598,7 +620,13 @@
       floatLayer.innerHTML = "";
     }
 
-    // Buttons on final screen
+    continueBtn.addEventListener("click", () => {
+      if (selectedCount() === 9){
+        show(s3);
+        startValentineEffects();
+      }
+    });
+
     document.getElementById("backBtn").addEventListener("click", () => {
       stopValentineEffects();
       show(s2);
@@ -609,11 +637,11 @@
       tiles.forEach(t => t.classList.remove("selected"));
       updateUI();
       show(s1);
-      // restart loader flow
+      checkline.classList.remove("checking");
+      setTimeout(() => checkline.classList.add("checking"), 900);
       setTimeout(() => show(s2), 2300);
     });
 
-    // Init
     updateUI();
   </script>
 </body>
